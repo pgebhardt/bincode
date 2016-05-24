@@ -151,10 +151,19 @@ impl<'a, W: Write> Encoder for EncoderWriter<'a, W> {
         inter.push(v);
         self.writer.write_all(inter.as_bytes()).map_err(EncodingError::IoError)
     }
+
+    #[cfg(not(feature = "opc-ua"))]
     fn emit_str(&mut self, v: &str) -> EncodingResult<()> {
         try!(self.emit_usize(v.len()));
         self.writer.write_all(v.as_bytes()).map_err(EncodingError::IoError)
     }
+
+    #[cfg(feature = "opc-ua")]
+    fn emit_str(&mut self, v: &str) -> EncodingResult<()> {
+        try!(self.emit_i32(v.len() as i32));
+        self.writer.write_all(v.as_bytes()).map_err(EncodingError::IoError)
+    }
+
     fn emit_enum<F>(&mut self, __: &str, f: F) -> EncodingResult<()>
         where F: FnOnce(&mut EncoderWriter<'a, W>) -> EncodingResult<()>
     {
@@ -234,12 +243,23 @@ impl<'a, W: Write> Encoder for EncoderWriter<'a, W> {
         try!(self.writer.write_u8(1).map_err(wrap_io));
         f(self)
     }
+
+    #[cfg(not(feature = "opc-ua"))]
     fn emit_seq<F>(&mut self, len: usize, f: F) -> EncodingResult<()>
         where F: FnOnce(&mut EncoderWriter<'a, W>) -> EncodingResult<()>
     {
         try!(self.emit_usize(len));
         f(self)
     }
+
+    #[cfg(feature = "opc-ua")]
+    fn emit_seq<F>(&mut self, len: usize, f: F) -> EncodingResult<()>
+        where F: FnOnce(&mut EncoderWriter<'a, W>) -> EncodingResult<()>
+    {
+        try!(self.emit_i32(len as i32));
+        f(self)
+    }
+
     fn emit_seq_elt<F>(&mut self, _: usize, f: F) -> EncodingResult<()>
         where F: FnOnce(&mut EncoderWriter<'a, W>) -> EncodingResult<()>
     {

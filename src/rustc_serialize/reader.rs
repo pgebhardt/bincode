@@ -238,6 +238,7 @@ impl<'a, R: Read> Decoder for DecoderReader<'a, R> {
         Ok(res)
     }
 
+    #[cfg(not(feature = "opc-ua"))]
     fn read_str(&mut self) -> DecodingResult<String> {
         let len = try!(self.read_usize());
         try!(self.read_bytes(len as u64));
@@ -252,6 +253,23 @@ impl<'a, R: Read> Decoder for DecoderReader<'a, R> {
             })),
         }
     }
+
+    #[cfg(feature = "opc-ua")]
+    fn read_str(&mut self) -> DecodingResult<String> {
+        let len = ::std::cmp::max(try!(self.read_i32()), 0) as u64;
+        try!(self.read_bytes(len));
+
+        let mut buff = Vec::new();
+        try!(self.reader.by_ref().take(len).read_to_end(&mut buff));
+        match String::from_utf8(buff) {
+            Ok(s) => Ok(s),
+            Err(err) => Err(DecodingError::InvalidEncoding(InvalidEncoding {
+                desc: "error while decoding utf8 string",
+                detail: Some(format!("Decoding error: {}", err))
+            })),
+        }
+    }
+
     fn read_enum<T, F>(&mut self, _: &str, f: F) -> DecodingResult<T>
         where F: FnOnce(&mut DecoderReader<'a, R>) -> DecodingResult<T>
     {
@@ -333,12 +351,23 @@ impl<'a, R: Read> Decoder for DecoderReader<'a, R> {
                 })),
             }
     }
+
+    #[cfg(not(feature = "opc-ua"))]
     fn read_seq<T, F>(&mut self, f: F) -> DecodingResult<T>
         where F: FnOnce(&mut DecoderReader<'a, R>, usize) -> DecodingResult<T>
     {
         let len = try!(self.read_usize());
         f(self, len)
     }
+
+    #[cfg(feature = "opc-ua")]
+    fn read_seq<T, F>(&mut self, f: F) -> DecodingResult<T>
+        where F: FnOnce(&mut DecoderReader<'a, R>, usize) -> DecodingResult<T>
+    {
+        let len = ::std::cmp::max(try!(self.read_i32()), 0) as usize;
+        f(self, len)
+    }
+
     fn read_seq_elt<T, F>(&mut self, _: usize, f: F) -> DecodingResult<T>
         where F: FnOnce(&mut DecoderReader<'a, R>) -> DecodingResult<T>
     {
