@@ -5,7 +5,7 @@ use std::fmt;
 
 use rustc_serialize_crate::Encoder;
 
-use byteorder::{BigEndian, WriteBytesExt};
+use byteorder::WriteBytesExt;
 
 pub type EncodingResult<T> = Result<T, EncodingError>;
 
@@ -105,13 +105,13 @@ impl<'a, W: Write> Encoder for EncoderWriter<'a, W> {
         self.emit_u64(v as u64)
     }
     fn emit_u64(&mut self, v: u64) -> EncodingResult<()> {
-        self.writer.write_u64::<BigEndian>(v).map_err(wrap_io)
+        self.writer.write_u64::<::ByteOrder>(v).map_err(wrap_io)
     }
     fn emit_u32(&mut self, v: u32) -> EncodingResult<()> {
-        self.writer.write_u32::<BigEndian>(v).map_err(wrap_io)
+        self.writer.write_u32::<::ByteOrder>(v).map_err(wrap_io)
     }
     fn emit_u16(&mut self, v: u16) -> EncodingResult<()> {
-        self.writer.write_u16::<BigEndian>(v).map_err(wrap_io)
+        self.writer.write_u16::<::ByteOrder>(v).map_err(wrap_io)
     }
     fn emit_u8(&mut self, v: u8) -> EncodingResult<()> {
         self.writer.write_u8(v).map_err(wrap_io)
@@ -120,13 +120,13 @@ impl<'a, W: Write> Encoder for EncoderWriter<'a, W> {
         self.emit_i64(v as i64)
     }
     fn emit_i64(&mut self, v: i64) -> EncodingResult<()> {
-        self.writer.write_i64::<BigEndian>(v).map_err(wrap_io)
+        self.writer.write_i64::<::ByteOrder>(v).map_err(wrap_io)
     }
     fn emit_i32(&mut self, v: i32) -> EncodingResult<()> {
-        self.writer.write_i32::<BigEndian>(v).map_err(wrap_io)
+        self.writer.write_i32::<::ByteOrder>(v).map_err(wrap_io)
     }
     fn emit_i16(&mut self, v: i16) -> EncodingResult<()> {
-        self.writer.write_i16::<BigEndian>(v).map_err(wrap_io)
+        self.writer.write_i16::<::ByteOrder>(v).map_err(wrap_io)
     }
     fn emit_i8(&mut self, v: i8) -> EncodingResult<()> {
         self.writer.write_i8(v).map_err(wrap_io)
@@ -135,10 +135,10 @@ impl<'a, W: Write> Encoder for EncoderWriter<'a, W> {
         self.writer.write_u8(if v {1} else {0}).map_err(wrap_io)
     }
     fn emit_f64(&mut self, v: f64) -> EncodingResult<()> {
-        self.writer.write_f64::<BigEndian>(v).map_err(wrap_io)
+        self.writer.write_f64::<::ByteOrder>(v).map_err(wrap_io)
     }
     fn emit_f32(&mut self, v: f32) -> EncodingResult<()> {
-        self.writer.write_f32::<BigEndian>(v).map_err(wrap_io)
+        self.writer.write_f32::<::ByteOrder>(v).map_err(wrap_io)
     }
     fn emit_char(&mut self, v: char) -> EncodingResult<()> {
         // TODO: change this back once unicode works

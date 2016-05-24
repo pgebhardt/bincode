@@ -21,3 +21,4 @@ serde_macros = "0.7.*"
 
 [features]
 default = ["rustc-serialize", "serde"]
+opc-ua = []

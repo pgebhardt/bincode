@@ -53,6 +53,12 @@ pub mod rustc_serialize;
 #[cfg(feature = "serde")]
 pub mod serde;
 
+#[cfg(feature = "opc-ua")]
+pub type ByteOrder = ::byteorder::LittleEndian;
+
+#[cfg(not(feature = "opc-ua"))]
+pub type ByteOrder = ::byteorder::NativeEndian;
+
 /// A limit on the amount of bytes that can be read or written.
 ///
 /// Size limits are an incredibly important part of both encoding and decoding.
@@ -76,4 +82,3 @@ pub enum SizeLimit {
     Infinite,
     Bounded(u64)
 }
-

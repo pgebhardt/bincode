@@ -4,7 +4,7 @@ use std::error::Error;
 use std::fmt;
 use std::convert::From;
 
-use byteorder::{BigEndian, ReadBytesExt};
+use byteorder::ReadBytesExt;
 use num_traits;
 use serde_crate as serde;
 use serde_crate::de::value::ValueDeserializer;
@@ -164,7 +164,7 @@ macro_rules! impl_nums {
             where V: serde::de::Visitor,
         {
             try!(self.read_type::<$ty>());
-            let value = try!(self.reader.$reader_method::<BigEndian>());
+            let value = try!(self.reader.$reader_method::<::ByteOrder>());
             visitor.$visitor_method(value)
         }
     }
@@ -221,7 +221,7 @@ impl<'a, R: Read> serde::Deserializer for Deserializer<'a, R> {
         where V: serde::de::Visitor,
     {
         try!(self.read_type::<u64>());
-        let value = try!(self.reader.read_u64::<BigEndian>());
+        let value = try!(self.reader.read_u64::<::ByteOrder>());
         match num_traits::cast(value) {
             Some(value) => visitor.visit_usize(value),
             None => Err(DeserializeError::Serde(serde::de::value::Error::Custom("expected usize".into())))
@@ -241,7 +241,7 @@ impl<'a, R: Read> serde::Deserializer for Deserializer<'a, R> {
         where V: serde::de::Visitor,
     {
         try!(self.read_type::<i64>());
-        let value = try!(self.reader.read_i64::<BigEndian>());
+        let value = try!(self.reader.read_i64::<::ByteOrder>());
         match num_traits::cast(value) {
             Some(value) => visitor.visit_isize(value),
             None => Err(DeserializeError::Serde(serde::de::value::Error::Custom("expected isize".into()))),
